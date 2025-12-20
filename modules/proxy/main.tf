@@ -43,7 +43,7 @@ resource "azurerm_linux_virtual_machine" "main" {
 
   admin_ssh_key {
     username   = local.username
-    public_key = file("${path.module}/../../keys/ssh_key.pub")
+    public_key = var.public_key_path
   }
 
   os_disk {

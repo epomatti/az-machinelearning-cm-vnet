@@ -2,15 +2,11 @@ terraform {
   required_providers {
     azurerm = {
       source  = "hashicorp/azurerm"
-      version = "3.110.0"
+      version = ">= 4.57.0"
     }
     azuread = {
       source  = "hashicorp/azuread"
-      version = "2.53.1"
-    }
-    azapi = {
-      source  = "Azure/azapi"
-      version = "1.13.1"
+      version = ">= 3.7.0"
     }
   }
 }
@@ -24,7 +20,6 @@ resource "random_string" "affix" {
 
 locals {
   affix                = random_string.affix.result
-  ssh_public_key       = file("${path.module}/${var.mlw_instance_ssh_public_key_rel_path}")
   allowed_ip_addresses = [var.allowed_ip_address]
   resouce_group_ids    = [azurerm_resource_group.default.id, azurerm_resource_group.private_endpoints.id]
 }
@@ -140,7 +135,6 @@ module "ampls" {
   source                     = "./modules/privatelink/scope"
   workload                   = var.workload
   resource_group_name        = azurerm_resource_group.default.name
-  resouce_group_id           = azurerm_resource_group.default.id
   log_analytics_workspace_id = module.monitor.log_analytics_workspace_id
   application_insights_id    = module.monitor.application_insights_id
 }
@@ -181,7 +175,7 @@ module "ml_compute" {
 
   machine_learning_workspace_id = module.ml_workspace.aml_workspace_id
   instance_vm_size              = var.mlw_instance_vm_size
-  ssh_public_key                = local.ssh_public_key
+  ssh_public_key                = var.public_key_path
   training_subnet_id            = module.vnet.training_subnet_id
 }
 
@@ -234,6 +228,7 @@ module "proxy" {
   size                = var.vm_proxy_vm_size
   subnet_id           = module.vnet.proxy_subnet_id
   zone_name           = azurerm_private_dns_zone.litware.name
+  public_key_path     = var.public_key_path
 }
 
 module "vm" {

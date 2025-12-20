@@ -2,7 +2,7 @@ resource "azurerm_route_table" "default" {
   name                          = "rt-all-to-hub"
   location                      = var.location
   resource_group_name           = var.resource_group_name
-  disable_bgp_route_propagation = false
+  bgp_route_propagation_enabled = false
 
   route {
     name                   = "route-all-to-hub"

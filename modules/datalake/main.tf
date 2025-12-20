@@ -7,7 +7,7 @@ resource "azurerm_storage_account" "lake" {
   account_tier                    = "Standard"
   account_replication_type        = "LRS"
   account_kind                    = "StorageV2"
-  enable_https_traffic_only       = true
+  https_traffic_only_enabled      = true
   allow_nested_items_to_be_public = false
   min_tls_version                 = "TLS1_2"
 

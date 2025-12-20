@@ -10,11 +10,13 @@ allowed_ip_address = "<YOUR_IP_ADDRESS>"
 vnet_training_nsg_source_address_prefix      = "VirtualNetwork" # *, VirtualNetwork
 vnet_training_nsg_destination_address_prefix = "*"              # *,Internet, VirtualNetwork
 
+# Key Pair
+public_key_path = ".keys/azure.pub"
+
 # Machine Learning - Training
-mlw_instance_create_flag             = false
-mlw_instance_vm_size                 = "STANDARD_D2AS_V4"
-mlw_instance_ssh_public_key_rel_path = "keys/ssh_key.pub"
-mlw_public_network_access_enabled    = false
+mlw_instance_create_flag          = false
+mlw_instance_vm_size              = "STANDARD_D2AS_V4"
+mlw_public_network_access_enabled = false
 
 # Machine Learning - AKS
 mlw_aks_create_flag = false

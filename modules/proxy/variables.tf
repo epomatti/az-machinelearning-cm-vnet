@@ -21,3 +21,7 @@ variable "size" {
 variable "zone_name" {
   type = string
 }
+
+variable "public_key_path" {
+  type = string
+}

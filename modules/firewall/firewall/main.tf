@@ -47,7 +47,7 @@ resource "azurerm_monitor_diagnostic_setting" "default" {
     category = "AZFWApplicationRule"
   }
 
-  metric {
+  enabled_metric {
     category = "AllMetrics"
   }
 }

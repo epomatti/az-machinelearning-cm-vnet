@@ -1,3 +1,4 @@
+### General ###
 variable "location" {
   type    = string
   default = "eastus2"
@@ -13,16 +14,25 @@ variable "workload" {
   default = "litware"
 }
 
+variable "subscription_id" {
+  type = string
+}
+
 variable "allowed_ip_address" {
   type = string
 }
 
-# VNET
+### VNET ###
 variable "vnet_training_nsg_source_address_prefix" {
   type = string
 }
 
 variable "vnet_training_nsg_destination_address_prefix" {
+  type = string
+}
+
+### Keys ###
+variable "public_key_path" {
   type = string
 }
 
@@ -32,10 +42,6 @@ variable "mlw_instance_create_flag" {
 }
 
 variable "mlw_instance_vm_size" {
-  type = string
-}
-
-variable "mlw_instance_ssh_public_key_rel_path" {
   type = string
 }
 

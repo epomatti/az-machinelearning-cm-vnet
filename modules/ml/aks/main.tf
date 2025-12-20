@@ -14,11 +14,11 @@ resource "azurerm_kubernetes_cluster" "default" {
   sku_tier                            = "Free"
 
   default_node_pool {
-    name                  = "default"
-    node_count            = var.node_count
-    vm_size               = var.vm_size
-    vnet_subnet_id        = var.scoring_subnet_id
-    enable_node_public_ip = false
+    name                   = "default"
+    node_count             = var.node_count
+    vm_size                = var.vm_size
+    vnet_subnet_id         = var.scoring_subnet_id
+    node_public_ip_enabled = false
   }
 
   network_profile {
@@ -34,7 +34,7 @@ resource "azurerm_kubernetes_cluster" "default" {
 
   # TODO: Implement this
   api_server_access_profile {
-    vnet_integration_enabled = false
+    virtual_network_integration_enabled = false
     # subnet_id                = var.scoring_aks_api_subnet_id
   }
 

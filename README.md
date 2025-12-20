@@ -4,40 +4,40 @@ Implementation of [AML network isolation][1] with a customer-managed VNET.
 
 <img src=".assets/aml.png" />
 
-## Setup
+## Deployment
 
 Create the variables file:
 
 ```sh
-cp config/template.tfvars .auto.tfvars
+cp config/local.auto.tfvars .auto.tfvars
 ```
 
-Configuration:
+Set the required variables:
 
-1. Set your IP address in the `allowed_ip_address` variable.
-2. Set your the Entra ID tenant in the  `entraid_tenant_domain` variable.
+| Variable | Description | Example |
+|-|-|-|
+| `allowed_ip_address` | Your IP address to be allowed in the firewall rules. | `1.2.3.4` |
+| `entraid_tenant_domain` | The Entra ID tenant domain use to create App Registrations  | `example.com` |
 
 Generate a key pair to manage instances with SSH:
 
 ```sh
-mkdir keys
-ssh-keygen -f keys/ssh_key
+(KEYS=.keys; mkdir "$KEYS" && ssh-keygen -f "$KEYS/azure")
 ```
 
 > [!TIP]
-> To allow public connection to the AML workspace, set `mlw_public_network_access_enabled = true`.
-
+> Setting `mlw_public_network_access_enabled = true` will allow public connection to the AML workspace.
 
 Create the resources:
 
 ```sh
 terraform init
-terraform apply -auto-approve
+terraform apply
 ```
 
-Confirm and approve any private endpoints, both in the subscription, and within the managed AML workspace.
+Next, confirm and approve any private endpoints, both in the subscription, and within the managed AML workspace.
 
-Manually create the datastores in AML and run the test notebooks.
+Manually create the datastores in AML to run the test notebooks.
 
 ## Compute
 
