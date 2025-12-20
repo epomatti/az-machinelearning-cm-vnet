@@ -20,10 +20,17 @@ resource "azurerm_private_dns_zone_virtual_network_link" "private_litware" {
 ### Subnets ###
 
 resource "azurerm_subnet" "bastion" {
-  name                 = "bastion"
+  name                 = "AzureBastionSubnet"
   resource_group_name  = var.resource_group_name
   virtual_network_name = azurerm_virtual_network.default.name
-  address_prefixes     = ["10.0.0.0/24"]
+  address_prefixes     = ["10.0.5.0/24"]
+}
+
+resource "azurerm_subnet" "windows" {
+  name                 = "windows"
+  resource_group_name  = var.resource_group_name
+  virtual_network_name = azurerm_virtual_network.default.name
+  address_prefixes     = ["10.0.10.0/24"]
 }
 
 resource "azurerm_subnet" "private_endpoints" {
@@ -84,6 +91,7 @@ resource "azurerm_subnet_network_security_group_association" "scoring_aks_api" {
 }
 
 ### Bastion NSG ###
+# https://learn.microsoft.com/en-us/azure/bastion/bastion-nsg
 resource "azurerm_network_security_group" "bastion" {
   name                = "nsg-bastion"
   location            = var.location
@@ -93,23 +101,73 @@ resource "azurerm_network_security_group" "bastion" {
 resource "azurerm_subnet_network_security_group_association" "bastion" {
   subnet_id                 = azurerm_subnet.bastion.id
   network_security_group_id = azurerm_network_security_group.bastion.id
+
+  depends_on = [
+    # Inbound
+    azurerm_network_security_rule.allow_https_inbound_bastion,
+    azurerm_network_security_rule.allow_gateway_manager_inbound_bastion,
+    azurerm_network_security_rule.allow_azure_load_balancer_inbound_bastion,
+    azurerm_network_security_rule.allow_bastion_host_communication_inbound_bastion
+
+    # Outbound
+  ]
 }
 
-resource "azurerm_network_security_rule" "allow_inbound_rdp_bastion" {
-  name                        = "AllowInboundRDP"
-  priority                    = 100
+resource "azurerm_network_security_rule" "allow_https_inbound_bastion" {
+  name                        = "AllowHttpsInbound"
+  priority                    = 120
   direction                   = "Inbound"
   access                      = "Allow"
-  protocol                    = "*"
+  protocol                    = "Tcp"
   source_port_range           = "*"
-  destination_port_range      = "3389"
-  source_address_prefix       = "${var.allowed_ip_address}/32"
+  destination_port_range      = "443"
+  source_address_prefix       = "Internet"
   destination_address_prefix  = "*"
   resource_group_name         = var.resource_group_name
   network_security_group_name = azurerm_network_security_group.bastion.name
 }
 
-# TODO: Add outbound restrictions
+resource "azurerm_network_security_rule" "allow_gateway_manager_inbound_bastion" {
+  name                        = "AllowGatewayManagerInbound"
+  priority                    = 130
+  direction                   = "Inbound"
+  access                      = "Allow"
+  protocol                    = "Tcp"
+  source_port_range           = "*"
+  destination_port_range      = "443"
+  source_address_prefix       = "GatewayManager"
+  destination_address_prefix  = "*"
+  resource_group_name         = var.resource_group_name
+  network_security_group_name = azurerm_network_security_group.bastion.name
+}
+
+resource "azurerm_network_security_rule" "allow_azure_load_balancer_inbound_bastion" {
+  name                        = "AllowAzureLoadBalancerInbound"
+  priority                    = 140
+  direction                   = "Inbound"
+  access                      = "Allow"
+  protocol                    = "Tcp"
+  source_port_range           = "*"
+  destination_port_range      = "443"
+  source_address_prefix       = "AzureLoadBalancer"
+  destination_address_prefix  = "*"
+  resource_group_name         = var.resource_group_name
+  network_security_group_name = azurerm_network_security_group.bastion.name
+}
+
+resource "azurerm_network_security_rule" "allow_bastion_host_communication_inbound_bastion" {
+  name                        = "AllowBastionHostCommunication"
+  priority                    = 150
+  direction                   = "Inbound"
+  access                      = "Allow"
+  protocol                    = "*"
+  source_port_range           = "*"
+  destination_port_ranges     = ["8080", "5701"]
+  source_address_prefix       = "VirtualNetwork"
+  destination_address_prefix  = "VirtualNetwork"
+  resource_group_name         = var.resource_group_name
+  network_security_group_name = azurerm_network_security_group.bastion.name
+}
 
 ### Proxy NSG ###
 resource "azurerm_network_security_group" "proxy" {

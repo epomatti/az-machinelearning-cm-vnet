@@ -231,6 +231,16 @@ module "proxy" {
   public_key_path     = var.public_key_path
 }
 
+module "bastion" {
+  count               = var.create_bastion_host ? 1 : 0
+  source              = "./modules/bastion"
+  workload            = var.workload
+  resource_group_name = azurerm_resource_group.default.name
+  location            = azurerm_resource_group.default.location
+  subnet              = module.vnet.bastion_subnet_id
+  sku                 = var.bastion_host_sku
+}
+
 module "vm" {
   source              = "./modules/vm"
   workload            = var.workload
@@ -238,7 +248,7 @@ module "vm" {
   location            = azurerm_resource_group.default.location
   size                = var.vm_size
   image_sku           = var.vm_image_sku
-  subnet              = module.vnet.bastion_subnet_id
+  subnet              = module.vnet.windows_subnet_id
   admin_username      = var.vm_admin_username
   admin_password      = var.vm_admin_password
 }

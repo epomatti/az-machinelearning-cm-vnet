@@ -16,6 +16,7 @@ Set the required variables:
 
 | Variable | Description | Example |
 |-|-|-|
+| `subscription_id` | The Azure Subscription ID. | `xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx` |
 | `allowed_ip_address` | Your IP address to be allowed in the firewall rules. | `1.2.3.4` |
 | `entraid_tenant_domain` | The Entra ID tenant domain use to create App Registrations  | `example.com` |
 

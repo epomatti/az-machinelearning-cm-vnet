@@ -92,6 +92,15 @@ variable "mssql_admin_login_password" {
   type = string
 }
 
+### Bastion Host ###
+variable "create_bastion_host" {
+  type = bool
+}
+
+variable "bastion_host_sku" {
+  type = string
+}
+
 ### Virtual Machine ###
 variable "vm_size" {
   type = string

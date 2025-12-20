@@ -10,7 +10,11 @@ output "bastion_subnet_id" {
   value = azurerm_subnet.bastion.id
 }
 
-output "bastion_subnet_address_prefixes" {
+output "windows_subnet_id" {
+  value = azurerm_subnet.bastion.id
+}
+
+output "windows_subnet_address_prefixes" {
   value = azurerm_subnet.bastion.address_prefixes
 }
 
