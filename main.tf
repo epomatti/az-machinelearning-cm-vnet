@@ -133,7 +133,7 @@ module "machine_learning_workspace" {
 module "ampls" {
   source                     = "./modules/private_link/scope"
   workload                   = var.workload
-  resource_group_name        = module.resource_groups.monitor_resource_group_name
+  resource_group_name        = module.resource_groups.ampls_resource_group_name
   log_analytics_workspace_id = module.monitor.log_analytics_workspace_id
   application_insights_id    = module.monitor.application_insights_id
 }
@@ -142,7 +142,7 @@ module "private_link_monitor" {
   source              = "./modules/private_link/monitor"
   workload            = "${var.workload}${local.affix}"
   location            = var.location
-  resource_group_name = module.resource_groups.machine_learning_resource_group_name
+  resource_group_name = module.resource_groups.ampls_resource_group_name
 
   vnet_id                       = module.network.vnet_id
   ampls_subnet_id               = module.network.private_endpoints_subnet_id

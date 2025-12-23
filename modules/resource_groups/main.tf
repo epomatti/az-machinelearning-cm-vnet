@@ -22,3 +22,8 @@ resource "azurerm_resource_group" "monitor" {
   name     = "rg-${var.workload}-monitor-${var.affix}"
   location = var.location
 }
+
+resource "azurerm_resource_group" "ampls" {
+  name     = "rg-${var.workload}-ampls-${var.affix}"
+  location = var.location
+}
