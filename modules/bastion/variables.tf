@@ -21,3 +21,7 @@ variable "sku" {
 variable "virtual_network_id" {
   type = string
 }
+
+variable "zones" {
+  type = list(string)
+}

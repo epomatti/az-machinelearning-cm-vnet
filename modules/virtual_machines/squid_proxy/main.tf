@@ -33,6 +33,7 @@ resource "azurerm_linux_virtual_machine" "main" {
   size                  = var.size
   admin_username        = var.admin_username
   network_interface_ids = [azurerm_network_interface.main.id]
+  zone                  = var.zone
 
   custom_data = filebase64("${path.module}/init.sh")
 
@@ -65,8 +66,8 @@ resource "azurerm_linux_virtual_machine" "main" {
 
 resource "azurerm_private_dns_cname_record" "squid" {
   name                = "squid"
-  zone_name           = var.zone_name
+  zone_name           = var.private_dns_zone_name
   resource_group_name = var.resource_group_name
   ttl                 = 300
-  record              = "${azurerm_linux_virtual_machine.main.name}.${var.zone_name}"
+  record              = "${azurerm_linux_virtual_machine.main.name}.${var.private_dns_zone_name}"
 }

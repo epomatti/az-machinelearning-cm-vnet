@@ -16,6 +16,10 @@ variable "subscription_id" {
   type = string
 }
 
+variable "availability_zone" {
+  type = string
+}
+
 variable "allowed_ip_addresses" {
   type = list(string)
 }

@@ -17,7 +17,8 @@ resource "random_integer" "affix" {
 }
 
 locals {
-  affix = random_integer.affix.result
+  affix              = random_integer.affix.result
+  availability_zones = [var.availability_zone]
 }
 
 module "resource_groups" {
@@ -46,6 +47,7 @@ module "bastion" {
   subnet              = module.network.bastion_subnet_id
   sku                 = var.bastion_host_sku
   virtual_network_id  = module.network.vnet_id
+  zones               = local.availability_zones
 
   depends_on = [module.network]
 }
@@ -227,23 +229,25 @@ module "windows11_virtual_machine" {
   size                = var.vm_size
   image_sku           = var.vm_image_sku
   subnet              = module.network.windows_subnet_id
+  zone                = var.availability_zone
   admin_username      = var.default_username
   admin_password      = var.default_password
 }
 
 module "squid_proxy_virtual_machine" {
-  count               = var.vm_squid_proxy_create_flag ? 1 : 0
-  source              = "./modules/virtual_machines/squid_proxy"
-  workload            = var.workload
-  resource_group_name = module.resource_groups.virtual_machines_resource_group_name
-  location            = var.location
-  size                = var.vm_squid_proxy_size
-  subnet_id           = module.network.proxy_subnet_id
-  zone_name           = module.network.private_zone_name
-  public_key_path     = var.public_key_path
-  offer               = var.vm_squid_proxy_offer
-  sku                 = var.vm_squid_proxy_sku
-  admin_username      = var.default_username
+  count                 = var.vm_squid_proxy_create_flag ? 1 : 0
+  source                = "./modules/virtual_machines/squid_proxy"
+  workload              = var.workload
+  resource_group_name   = module.resource_groups.virtual_machines_resource_group_name
+  location              = var.location
+  size                  = var.vm_squid_proxy_size
+  subnet_id             = module.network.proxy_subnet_id
+  zone                  = var.availability_zone
+  private_dns_zone_name = module.network.private_zone_name
+  public_key_path       = var.public_key_path
+  offer                 = var.vm_squid_proxy_offer
+  sku                   = var.vm_squid_proxy_sku
+  admin_username        = var.default_username
 }
 
 module "iam_administrator_permissions" {

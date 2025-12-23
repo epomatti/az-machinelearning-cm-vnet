@@ -3,6 +3,7 @@ location           = "brazilsouth"
 region_service_tag = "BrazilSouth"
 workload           = "litware"
 subscription_id    = "<1111111-2222-3333-4444-555555555555>"
+availability_zone  = 1
 
 # The IPv4 from where you'll access the resources
 allowed_ip_addresses = ["<x.x.x.x>/30"]

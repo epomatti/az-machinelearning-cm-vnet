@@ -11,8 +11,9 @@ resource "azurerm_bastion_host" "main" {
   name                = "bas-${var.workload}"
   location            = var.location
   resource_group_name = var.resource_group_name
+  zones               = var.zones
+  sku                 = var.sku
 
-  sku                = var.sku
   virtual_network_id = var.sku == "Developer" ? var.virtual_network_id : null
 
   dynamic "ip_configuration" {

@@ -18,7 +18,7 @@ variable "size" {
   type = string
 }
 
-variable "zone_name" {
+variable "private_dns_zone_name" {
   type = string
 }
 
@@ -35,5 +35,9 @@ variable "offer" {
 }
 
 variable "sku" {
+  type = string
+}
+
+variable "zone" {
   type = string
 }
