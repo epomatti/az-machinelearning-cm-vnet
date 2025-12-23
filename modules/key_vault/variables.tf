@@ -13,3 +13,8 @@ variable "workload" {
 variable "allowed_ip_addresses" {
   type = list(string)
 }
+
+variable "win11_azureuser_password" {
+  type      = string
+  sensitive = true
+}

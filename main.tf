@@ -66,11 +66,12 @@ module "blob_storage" {
 }
 
 module "key_vault" {
-  source               = "./modules/key_vault"
-  workload             = "${var.workload}${local.affix}"
-  resource_group_name  = module.resource_groups.machine_learning_resource_group_name
-  location             = var.location
-  allowed_ip_addresses = var.allowed_ip_addresses
+  source                   = "./modules/key_vault"
+  workload                 = "${var.workload}${local.affix}"
+  resource_group_name      = module.resource_groups.machine_learning_resource_group_name
+  location                 = var.location
+  allowed_ip_addresses     = var.allowed_ip_addresses
+  win11_azureuser_password = var.default_password
 }
 
 module "container_registry" {
