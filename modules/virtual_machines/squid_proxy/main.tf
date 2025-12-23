@@ -33,7 +33,7 @@ resource "azurerm_linux_virtual_machine" "main" {
   size                  = var.size
   admin_username        = var.admin_username
   network_interface_ids = [azurerm_network_interface.main.id]
-  zone                  = var.zone
+  # zone                  = var.zone
 
   custom_data = filebase64("${path.module}/init.sh")
 

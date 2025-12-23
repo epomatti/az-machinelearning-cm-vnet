@@ -26,8 +26,27 @@ resource "azurerm_storage_account" "default" {
   }
 }
 
+# FIXME: Correct resource name
 resource "azurerm_role_assignment" "adlsv2" {
   scope                = azurerm_storage_account.default.id
   role_definition_name = "Storage Blob Data Contributor"
   principal_id         = data.azuread_client_config.current.object_id
+}
+
+resource "azurerm_storage_container" "customers" {
+  name                  = "customers"
+  storage_account_id    = azurerm_storage_account.default.id
+  container_access_type = "private"
+}
+
+locals {
+  file = "customers.csv"
+}
+
+resource "azurerm_storage_blob" "customers_csv" {
+  name                   = local.file
+  storage_account_name   = azurerm_storage_account.default.name
+  storage_container_name = azurerm_storage_container.customers.name
+  type                   = "Block"
+  source                 = "${path.module}/${local.file}"
 }

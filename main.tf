@@ -133,6 +133,13 @@ module "machine_learning_workspace" {
   container_registry_id   = module.container_registry.id
 }
 
+module "datastore" {
+  source                    = "./modules/machine_learning/datastores"
+  workspace_id              = module.machine_learning_workspace.aml_workspace_id
+  blob_storage_container_id = module.blob_storage.customers_storage_container_id
+  blob_storage_account_key  = module.blob_storage.storage_account_primary_access_key
+}
+
 module "ampls" {
   source                     = "./modules/private_link/scope"
   workload                   = var.workload
