@@ -66,6 +66,12 @@ resource "azurerm_role_assignment" "storage_contributor" {
   principal_id         = azurerm_user_assigned_identity.mlw.principal_id
 }
 
+resource "azurerm_role_assignment" "azure_ai_administrator" {
+  scope                = var.storage_account_id
+  role_definition_name = "Azure AI Administrator"
+  principal_id         = azurerm_user_assigned_identity.mlw.principal_id
+}
+
 resource "azurerm_role_assignment" "application_insights" {
   scope                = var.application_insights_id
   role_definition_name = "Contributor"

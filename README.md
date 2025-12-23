@@ -67,6 +67,9 @@ az ml workspace update --name myworkspace --resource-group myresourcegroup --ima
 
 This project has two roles which require different set of permissions:
 
+> [!IMPORTANT]
+> New [security contraints](https://learn.microsoft.com/en-us/entra/identity/authentication/overview-authentication?WT.mc_id=Portal-Microsoft_AAD_IAM#phishing-resistant-authentication-methods) apply for user accounts
+
 | User | Activities |
 |------|------------|
 | `azureadmin` | Administration of all related Azure resources. |

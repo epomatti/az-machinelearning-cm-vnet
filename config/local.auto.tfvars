@@ -17,7 +17,7 @@ vnet_training_nsg_destination_address_prefix = "*"              # *,Internet, Vi
 
 # Bastion Host
 create_bastion_host = true
-bastion_host_sku    = "Developer"
+bastion_host_sku    = "Basic"
 
 # Key Pair
 public_key_path = ".keys/azure.pub"
