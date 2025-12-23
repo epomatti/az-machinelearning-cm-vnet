@@ -11,15 +11,13 @@ terraform {
   }
 }
 
-resource "random_string" "affix" {
-  length  = 6
-  special = false
-  upper   = false
-  numeric = true
+resource "random_integer" "affix" {
+  max = 999
+  min = 000
 }
 
 locals {
-  affix                = random_string.affix.result
+  affix                = random_integer.affix.result
   allowed_ip_addresses = [var.allowed_ip_address]
 }
 
@@ -30,11 +28,6 @@ module "resource_groups" {
   affix    = local.affix
 }
 
-resource "azurerm_private_dns_zone" "litware" {
-  name                = "private.${var.workload}.com"
-  resource_group_name = module.resource_groups.network_resource_group_name
-}
-
 module "network" {
   source                                  = "./modules/network"
   workload                                = var.workload
@@ -43,7 +36,6 @@ module "network" {
   allowed_ip_address                      = var.allowed_ip_address
   training_nsg_source_address_prefix      = var.vnet_training_nsg_source_address_prefix
   training_nsg_destination_address_prefix = var.vnet_training_nsg_destination_address_prefix
-  private_dns_zone_name                   = azurerm_private_dns_zone.litware.name
 }
 
 module "bastion" {
@@ -66,16 +58,16 @@ module "monitor" {
   location            = var.location
 }
 
-module "storage" {
-  source              = "./modules/storage"
+module "blob_storage" {
+  source              = "./modules/storage/blob"
   workload            = "${var.workload}${local.affix}"
   resource_group_name = module.resource_groups.machine_learning_resource_group_name
   location            = var.location
   ip_network_rules    = local.allowed_ip_addresses
 }
 
-module "keyvault" {
-  source               = "./modules/keyvault"
+module "key_vault" {
+  source               = "./modules/key_vault"
   workload             = "${var.workload}${local.affix}"
   resource_group_name  = module.resource_groups.machine_learning_resource_group_name
   location             = var.location
@@ -104,8 +96,8 @@ module "entra_service_principal" {
   administrator_user_object_id = module.entra_users.administrator_user_object_id
 }
 
-module "data_lake" {
-  source              = "./modules/datalake"
+module "data_lake_storage" {
+  source              = "./modules/storage/lake"
   workload            = "${var.workload}${local.affix}"
   resource_group_name = module.resource_groups.machine_learning_resource_group_name
   location            = var.location
@@ -135,8 +127,8 @@ module "ml_workspace" {
   public_network_access_enabled = var.mlw_public_network_access_enabled
 
   application_insights_id = module.monitor.application_insights_id
-  storage_account_id      = module.storage.storage_account_id
-  key_vault_id            = module.keyvault.key_vault_id
+  storage_account_id      = module.blob_storage.storage_account_id
+  key_vault_id            = module.key_vault.key_vault_id
   container_registry_id   = module.container_registry.id
 }
 
@@ -167,11 +159,11 @@ module "private_link_aml" {
   vnet_id                     = module.network.vnet_id
   private_endpoints_subnet_id = module.network.private_endpoints_subnet_id
 
-  aml_workspace_id             = module.ml_workspace.aml_workspace_id
+  aml_workspace_id             = module.machine_learning_workspace.aml_workspace_id
   container_registry_id        = module.container_registry.id
-  keyvault_id                  = module.keyvault.key_vault_id
-  aml_storage_account_id       = module.storage.storage_account_id
-  data_lake_storage_account_id = module.data_lake.id
+  key_vault_id                 = module.key_vault.key_vault_id
+  aml_storage_account_id       = module.blob_storage.storage_account_id
+  data_lake_storage_account_id = module.data_lake_storage.id
 
   mlw_mssql_create_flag = var.mssql_create_flag
   sql_server_id         = var.mssql_create_flag == true ? module.mssql[0].server_id : null
@@ -182,7 +174,7 @@ module "ml_compute" {
   count    = var.mlw_instance_create_flag ? 1 : 0
   location = var.location
 
-  machine_learning_workspace_id = module.ml_workspace.aml_workspace_id
+  machine_learning_workspace_id = module.machine_learning_workspace.aml_workspace_id
   instance_vm_size              = var.mlw_instance_vm_size
   ssh_public_key                = var.public_key_path
   training_subnet_id            = module.network.training_subnet_id
@@ -196,7 +188,7 @@ module "ml_aks" {
   location            = var.location
   vnet_id             = module.network.vnet_id
 
-  machine_learning_workspace_id = module.ml_workspace.aml_workspace_id
+  machine_learning_workspace_id = module.machine_learning_workspace.aml_workspace_id
   scoring_subnet_id             = module.network.scoring_subnet_id
   scoring_aks_api_subnet_id     = module.network.scoring_aks_api_subnet_id
   node_count                    = var.mlw_aks_node_count
@@ -209,7 +201,7 @@ module "firewall" {
   source = "./modules/firewall"
 
   machilelearning_rg_name            = module.resource_groups.network_resource_group_name
-  aml_workspace_default_storage_name = module.storage.storage_account_name
+  aml_workspace_default_storage_name = module.blob_storage.storage_account_name
 
   workload           = var.workload
   affix              = local.affix
@@ -248,7 +240,7 @@ module "squid_proxy_virtual_machine" {
   location            = var.location
   size                = var.vm_squid_proxy_size
   subnet_id           = module.network.proxy_subnet_id
-  zone_name           = azurerm_private_dns_zone.litware.name
+  zone_name           = module.network.private_zone_name
   public_key_path     = var.public_key_path
   offer               = var.vm_squid_proxy_offer
   sku                 = var.vm_squid_proxy_sku

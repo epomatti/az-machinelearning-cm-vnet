@@ -52,3 +52,7 @@ output "subnet_ids" {
     azurerm_subnet.proxy.id
   ]
 }
+
+output "private_zone_name" {
+  value = azurerm_private_dns_zone.default.name
+}

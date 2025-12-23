@@ -22,7 +22,7 @@ variable "container_registry_id" {
   type = string
 }
 
-variable "keyvault_id" {
+variable "key_vault_id" {
   type = string
 }
 

@@ -14,6 +14,11 @@ resource "azurerm_resource_group" "machine_learning" {
 }
 
 resource "azurerm_resource_group" "private_link" {
-  name     = "rg-${var.workload}-privatelink-${var.affix}"
+  name     = "rg-${var.workload}-private-link-${var.affix}"
+  location = var.location
+}
+
+resource "azurerm_resource_group" "monitor" {
+  name     = "rg-${var.workload}-monitor-${var.affix}"
   location = var.location
 }

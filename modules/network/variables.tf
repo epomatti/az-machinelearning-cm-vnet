@@ -21,7 +21,3 @@ variable "training_nsg_source_address_prefix" {
 variable "training_nsg_destination_address_prefix" {
   type = string
 }
-
-variable "private_dns_zone_name" {
-  type = string
-}
