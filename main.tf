@@ -133,11 +133,22 @@ module "machine_learning_workspace" {
   container_registry_id   = module.container_registry.id
 }
 
+# TODO: Confirm access in private network
 module "datastore" {
-  source                    = "./modules/machine_learning/datastores"
-  workspace_id              = module.machine_learning_workspace.aml_workspace_id
+  source       = "./modules/machine_learning/datastores"
+  workspace_id = module.machine_learning_workspace.aml_workspace_id
+
+  # Blob Storage
   blob_storage_container_id = module.blob_storage.customers_storage_container_id
   blob_storage_account_key  = module.blob_storage.storage_account_primary_access_key
+
+  # Data Lake
+  resource_group_name                    = module.resource_groups.machine_learning_resource_group_name
+  data_lake_storage_account_name         = module.data_lake_storage.storage_account_name
+  data_lake_storage_filesystem_name      = module.data_lake_storage.filesystem_name
+  data_lake_storage_filesystem_id        = module.data_lake_storage.filesystem_id
+  application_registration_client_id     = module.entra_service_principal.client_id
+  application_registration_client_secret = module.entra_service_principal.client_secret
 }
 
 module "ampls" {
@@ -171,7 +182,7 @@ module "private_link_aml" {
   container_registry_id        = module.container_registry.id
   key_vault_id                 = module.key_vault.key_vault_id
   aml_storage_account_id       = module.blob_storage.storage_account_id
-  data_lake_storage_account_id = module.data_lake_storage.id
+  data_lake_storage_account_id = module.data_lake_storage.storage_account_id
 
   mlw_mssql_create_flag = var.mssql_create_flag
   sql_server_id         = var.mssql_create_flag == true ? module.mssql[0].server_id : null
