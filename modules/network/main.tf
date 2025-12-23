@@ -11,7 +11,7 @@ resource "azurerm_virtual_network" "default" {
 
 resource "azurerm_private_dns_zone" "default" {
   name                = "private.${var.workload}.com"
-  resource_group_name = module.resource_groups.network_resource_group_name
+  resource_group_name = var.resource_group_name
 }
 
 resource "azurerm_private_dns_zone_virtual_network_link" "default" {
@@ -135,7 +135,7 @@ resource "azurerm_network_security_rule" "allow_inbound_ssh_proxy" {
   protocol                    = "*"
   source_port_range           = "*"
   destination_port_range      = "22"
-  source_address_prefix       = "${var.allowed_ip_address}/32"
+  source_address_prefixes     = var.allowed_ip_addresses
   destination_address_prefix  = "*"
   resource_group_name         = var.resource_group_name
   network_security_group_name = azurerm_network_security_group.proxy.name
@@ -161,7 +161,7 @@ resource "azurerm_network_security_rule" "allow_inbound_ssh_compute_instances" {
   protocol                    = "*"
   source_port_range           = "*"
   destination_port_range      = "22"
-  source_address_prefix       = "${var.allowed_ip_address}/32"
+  source_address_prefixes     = var.allowed_ip_addresses
   destination_address_prefix  = "*"
   resource_group_name         = var.resource_group_name
   network_security_group_name = azurerm_network_security_group.training.name

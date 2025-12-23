@@ -10,6 +10,6 @@ variable "workload" {
   type = string
 }
 
-variable "allowed_ip_address" {
-  type = string
+variable "allowed_ip_addresses" {
+  type = list(string)
 }

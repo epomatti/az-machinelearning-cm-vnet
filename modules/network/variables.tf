@@ -10,8 +10,8 @@ variable "resource_group_name" {
   type = string
 }
 
-variable "allowed_ip_address" {
-  type = string
+variable "allowed_ip_addresses" {
+  type = list(string)
 }
 
 variable "training_nsg_source_address_prefix" {

@@ -13,9 +13,10 @@ resource "azurerm_container_registry" "default" {
 
     ip_rule {
       action   = "Allow"
-      ip_range = "${var.allowed_ip_address}/32"
+      ip_range = var.allowed_ip_addresses[0]
     }
   }
+
 
   network_rule_bypass_option = "AzureServices"
 }

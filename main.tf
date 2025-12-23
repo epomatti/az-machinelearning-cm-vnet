@@ -13,12 +13,11 @@ terraform {
 
 resource "random_integer" "affix" {
   max = 999
-  min = 000
+  min = 111
 }
 
 locals {
-  affix                = random_integer.affix.result
-  allowed_ip_addresses = [var.allowed_ip_address]
+  affix = random_integer.affix.result
 }
 
 module "resource_groups" {
@@ -33,7 +32,7 @@ module "network" {
   workload                                = var.workload
   resource_group_name                     = module.resource_groups.network_resource_group_name
   location                                = var.location
-  allowed_ip_address                      = var.allowed_ip_address
+  allowed_ip_addresses                    = var.allowed_ip_addresses
   training_nsg_source_address_prefix      = var.vnet_training_nsg_source_address_prefix
   training_nsg_destination_address_prefix = var.vnet_training_nsg_destination_address_prefix
 }
@@ -54,7 +53,7 @@ module "bastion" {
 module "monitor" {
   source              = "./modules/monitor"
   workload            = var.workload
-  resource_group_name = module.resource_groups.machine_learning_resource_group_name
+  resource_group_name = module.resource_groups.monitor_resource_group_name
   location            = var.location
 }
 
@@ -63,7 +62,7 @@ module "blob_storage" {
   workload            = "${var.workload}${local.affix}"
   resource_group_name = module.resource_groups.machine_learning_resource_group_name
   location            = var.location
-  ip_network_rules    = local.allowed_ip_addresses
+  ip_network_rules    = var.allowed_ip_addresses
 }
 
 module "key_vault" {
@@ -71,15 +70,15 @@ module "key_vault" {
   workload             = "${var.workload}${local.affix}"
   resource_group_name  = module.resource_groups.machine_learning_resource_group_name
   location             = var.location
-  allowed_ip_addresses = local.allowed_ip_addresses
+  allowed_ip_addresses = var.allowed_ip_addresses
 }
 
 module "container_registry" {
-  source              = "./modules/container_registry"
-  workload            = "${var.workload}${local.affix}"
-  resource_group_name = module.resource_groups.machine_learning_resource_group_name
-  location            = var.location
-  allowed_ip_address  = var.allowed_ip_address
+  source               = "./modules/container_registry"
+  workload             = "${var.workload}${local.affix}"
+  resource_group_name  = module.resource_groups.machine_learning_resource_group_name
+  location             = var.location
+  allowed_ip_addresses = var.allowed_ip_addresses
 }
 
 module "entra_users" {
@@ -101,7 +100,7 @@ module "data_lake_storage" {
   workload            = "${var.workload}${local.affix}"
   resource_group_name = module.resource_groups.machine_learning_resource_group_name
   location            = var.location
-  ip_network_rules    = local.allowed_ip_addresses
+  ip_network_rules    = var.allowed_ip_addresses
 }
 
 module "mssql" {
@@ -111,16 +110,15 @@ module "mssql" {
   resource_group_name = module.resource_groups.machine_learning_resource_group_name
   location            = var.location
 
-  sku                      = var.mssql_sku
-  max_size_gb              = var.mssql_max_size_gb
-  admin_login              = var.mssql_admin_login
-  admin_login_password     = var.default_password
-  localfw_start_ip_address = var.allowed_ip_address
-  localfw_end_ip_address   = var.allowed_ip_address
+  sku                                 = var.mssql_sku
+  max_size_gb                         = var.mssql_max_size_gb
+  admin_login                         = var.mssql_admin_login
+  admin_login_password                = var.default_password
+  local_firewall_allowed_ip_addresses = var.allowed_ip_addresses
 }
 
-module "ml_workspace" {
-  source                        = "./modules/ml/workspace"
+module "machine_learning_workspace" {
+  source                        = "./modules/machine_learning/workspace"
   workload                      = "${var.workload}${local.affix}"
   resource_group_name           = module.resource_groups.machine_learning_resource_group_name
   location                      = var.location
@@ -135,7 +133,7 @@ module "ml_workspace" {
 module "ampls" {
   source                     = "./modules/private_link/scope"
   workload                   = var.workload
-  resource_group_name        = module.resource_groups.machine_learning_resource_group_name
+  resource_group_name        = module.resource_groups.monitor_resource_group_name
   log_analytics_workspace_id = module.monitor.log_analytics_workspace_id
   application_insights_id    = module.monitor.application_insights_id
 }
@@ -170,7 +168,7 @@ module "private_link_aml" {
 }
 
 module "ml_compute" {
-  source   = "./modules/ml/compute"
+  source   = "./modules/machine_learning/compute"
   count    = var.mlw_instance_create_flag ? 1 : 0
   location = var.location
 
@@ -181,7 +179,7 @@ module "ml_compute" {
 }
 
 module "ml_aks" {
-  source              = "./modules/ml/aks"
+  source              = "./modules/machine_learning/aks"
   count               = var.mlw_aks_create_flag ? 1 : 0
   workload            = var.workload
   resource_group_name = module.resource_groups.machine_learning_resource_group_name

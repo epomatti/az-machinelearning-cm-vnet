@@ -27,11 +27,6 @@ variable "admin_login_password" {
   sensitive = true
 }
 
-variable "localfw_start_ip_address" {
-  type = string
+variable "local_firewall_allowed_ip_addresses" {
+  type = list(string)
 }
-
-variable "localfw_end_ip_address" {
-  type = string
-}
-

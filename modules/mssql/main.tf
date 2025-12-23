@@ -5,7 +5,7 @@ resource "azurerm_mssql_server" "default" {
   version             = "12.0"
   minimum_tls_version = "1.2"
 
-  # Further controlled by firewall rules below
+  # Managed by firewall rules below
   public_network_access_enabled = true
 
   administrator_login          = var.admin_login
@@ -27,10 +27,11 @@ resource "azurerm_mssql_database" "default" {
 }
 
 resource "azurerm_mssql_firewall_rule" "local" {
-  name             = "FirewallRuleLocal"
+  count            = length(var.local_firewall_allowed_ip_addresses)
+  name             = "FirewallRuleLocal_${count.index}"
   server_id        = azurerm_mssql_server.default.id
-  start_ip_address = var.localfw_start_ip_address
-  end_ip_address   = var.localfw_end_ip_address
+  start_ip_address = var.local_firewall_allowed_ip_addresses[count.index]
+  end_ip_address   = var.local_firewall_allowed_ip_addresses[count.index]
 }
 
 # Allow Azure Services to connect.

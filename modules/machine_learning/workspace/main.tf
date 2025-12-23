@@ -6,7 +6,7 @@ resource "azurerm_user_assigned_identity" "mlw" {
 
 resource "azurerm_machine_learning_workspace" "default" {
   name                          = "mlw-${var.workload}"
-  friendly_name                 = "Litware Machine Learning"
+  friendly_name                 = "Machine Learning"
   location                      = var.location
   resource_group_name           = var.resource_group_name
   public_network_access_enabled = var.public_network_access_enabled

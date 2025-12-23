@@ -1,7 +1,6 @@
 ### General ###
 variable "location" {
-  type    = string
-  default = "eastus2"
+  type = string
 }
 
 variable "region_service_tag" {
@@ -10,16 +9,15 @@ variable "region_service_tag" {
 }
 
 variable "workload" {
-  type    = string
-  default = "litware"
+  type = string
 }
 
 variable "subscription_id" {
   type = string
 }
 
-variable "allowed_ip_address" {
-  type = string
+variable "allowed_ip_addresses" {
+  type = list(string)
 }
 
 ### Shared ###
