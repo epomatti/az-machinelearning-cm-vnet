@@ -13,7 +13,7 @@ resource "azurerm_machine_learning_workspace" "default" {
 
   application_insights_id = var.application_insights_id
   key_vault_id            = var.key_vault_id
-  storage_account_id      = var.storage_account_id
+  storage_account_id      = var.blob_storage_account_id
   container_registry_id   = var.container_registry_id
 
   primary_user_assigned_identity = azurerm_user_assigned_identity.mlw.id
@@ -55,19 +55,19 @@ resource "azurerm_role_assignment" "key_vault_administrator" {
 }
 
 resource "azurerm_role_assignment" "storage" {
-  scope                = var.storage_account_id
+  scope                = var.blob_storage_account_id
   role_definition_name = "Storage Blob Data Contributor"
   principal_id         = azurerm_user_assigned_identity.mlw.principal_id
 }
 
 resource "azurerm_role_assignment" "storage_contributor" {
-  scope                = var.storage_account_id
+  scope                = var.blob_storage_account_id
   role_definition_name = "Contributor"
   principal_id         = azurerm_user_assigned_identity.mlw.principal_id
 }
 
 resource "azurerm_role_assignment" "azure_ai_administrator" {
-  scope                = var.storage_account_id
+  scope                = var.blob_storage_account_id
   role_definition_name = "Azure AI Administrator"
   principal_id         = azurerm_user_assigned_identity.mlw.principal_id
 }
@@ -81,5 +81,17 @@ resource "azurerm_role_assignment" "application_insights" {
 resource "azurerm_role_assignment" "container_registry" {
   scope                = var.container_registry_id
   role_definition_name = "Contributor"
+  principal_id         = azurerm_user_assigned_identity.mlw.principal_id
+}
+
+resource "azurerm_role_assignment" "data_lake_storage_blob_data_owner" {
+  scope                = var.data_lake_storage_account_id
+  role_definition_name = "Storage Blob Data Owner"
+  principal_id         = azurerm_user_assigned_identity.mlw.principal_id
+}
+
+resource "azurerm_role_assignment" "data_lake_azure_ai_administrator" {
+  scope                = var.data_lake_storage_account_id
+  role_definition_name = "Azure AI Administrator"
   principal_id         = azurerm_user_assigned_identity.mlw.principal_id
 }

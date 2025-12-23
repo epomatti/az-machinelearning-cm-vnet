@@ -127,10 +127,11 @@ module "machine_learning_workspace" {
   location                      = var.location
   public_network_access_enabled = var.mlw_public_network_access_enabled
 
-  application_insights_id = module.monitor.application_insights_id
-  storage_account_id      = module.blob_storage.storage_account_id
-  key_vault_id            = module.key_vault.key_vault_id
-  container_registry_id   = module.container_registry.id
+  application_insights_id      = module.monitor.application_insights_id
+  blob_storage_account_id      = module.blob_storage.storage_account_id
+  data_lake_storage_account_id = module.data_lake_storage.storage_account_id
+  key_vault_id                 = module.key_vault.key_vault_id
+  container_registry_id        = module.container_registry.id
 }
 
 # TODO: Confirm access in private network

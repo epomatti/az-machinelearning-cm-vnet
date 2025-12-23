@@ -40,6 +40,24 @@ Next, confirm and approve any private endpoints, both in the subscription, and w
 
 Manually create the datastores in AML to run the test notebooks.
 
+## 
+
+```sh
+sudo apt update
+sudo apt upgrade -y
+```
+
+```sh
+python -m pip install --upgrade pip
+pip install --upgrade mlflow mlflow-skinny
+pip install mlflow==3.1.1 mlflow-skinny==3.1.1
+pip install --upgrade mlflow-skinny==3.1.1
+
+pip install --upgrade <package_name>
+
+pip install --upgrade azureml-mlflow
+```
+
 ## Compute
 
 Create the AML compute and other resources by changing the appropriate flags:
