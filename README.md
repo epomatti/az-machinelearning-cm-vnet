@@ -97,7 +97,12 @@ This will create the firewall, policies, rules, routes, and other resources.
 ## Forward Proxy
 
 > [!CAUTION]
-> It was not possible to configure a forward proxy on instance creation (with a creation script) when deploying to an isolated Virtual Network. It seems that the provisioning procedure is overriding the proxy configuration from the startup script. The only official architecture supported by Microsoft with network isolation seems to be using a Firewall for egress. 
+> It was not possible to configure a forward proxy on instance creation (with a creation script) when deploying to an isolated Virtual Network. It seems that the provisioning procedure is overriding the proxy configuration from the startup script. The only official architecture supported by Microsoft with network isolation seems to be using a Firewall for egress.
+
+As per the script customization [documentation](https://learn.microsoft.com/en-us/azure/machine-learning/how-to-customize-compute-instance?view=azureml-api-2):
+
+> Creation script - runs once when the compute instance is created.
+> Startup script- runs every time the compute instance is started (including initial creation).
 
 ### Enable Proxy
 
