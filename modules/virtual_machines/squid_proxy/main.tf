@@ -1,17 +1,21 @@
+locals {
+  name = "squid-proxy"
+}
+
 resource "azurerm_public_ip" "main" {
-  name                = "pip-proxy"
+  name                = "pip-${local.name}"
   resource_group_name = var.resource_group_name
   location            = var.location
   allocation_method   = "Static"
 }
 
 resource "azurerm_network_interface" "main" {
-  name                = "nic-proxy"
+  name                = "nic-${local.name}"
   resource_group_name = var.resource_group_name
   location            = var.location
 
   ip_configuration {
-    name                          = "proxy"
+    name                          = "ipconfig1"
     subnet_id                     = var.subnet_id
     private_ip_address_allocation = "Dynamic"
     public_ip_address_id          = azurerm_public_ip.main.id
@@ -22,17 +26,12 @@ resource "azurerm_network_interface" "main" {
   }
 }
 
-locals {
-  username = "azureuser"
-}
-
 resource "azurerm_linux_virtual_machine" "main" {
-  name                  = "vm-proxy"
+  name                  = "vm-${local.name}"
   resource_group_name   = var.resource_group_name
   location              = var.location
   size                  = var.size
-  admin_username        = local.username
-  admin_password        = "P@ssw0rd.123"
+  admin_username        = var.admin_username
   network_interface_ids = [azurerm_network_interface.main.id]
 
   custom_data = filebase64("${path.module}/init.sh")
@@ -42,12 +41,12 @@ resource "azurerm_linux_virtual_machine" "main" {
   }
 
   admin_ssh_key {
-    username   = local.username
+    username   = var.admin_username
     public_key = var.public_key_path
   }
 
   os_disk {
-    name                 = "osdisk-proxy"
+    name                 = "osdisk-${local.name}"
     caching              = "ReadOnly"
     storage_account_type = "StandardSSD_LRS"
   }

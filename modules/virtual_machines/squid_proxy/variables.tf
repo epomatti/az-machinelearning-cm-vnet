@@ -25,3 +25,15 @@ variable "zone_name" {
 variable "public_key_path" {
   type = string
 }
+
+variable "admin_username" {
+  type = string
+}
+
+variable "offer" {
+  type = string
+}
+
+variable "sku" {
+  type = string
+}

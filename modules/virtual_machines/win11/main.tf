@@ -1,20 +1,24 @@
-resource "azurerm_public_ip" "windows11" {
-  name                = "pip-windows11"
+locals {
+  name = "win11"
+}
+
+resource "azurerm_public_ip" "default" {
+  name                = "pip-${local.name}"
   resource_group_name = var.resource_group_name
   location            = var.location
   allocation_method   = "Static"
 }
 
-resource "azurerm_network_interface" "windows11" {
-  name                = "nic-windows11"
+resource "azurerm_network_interface" "default" {
+  name                = "nic-${local.name}"
   resource_group_name = var.resource_group_name
   location            = var.location
 
   ip_configuration {
-    name                          = "windows11"
+    name                          = "ipconfig1"
     subnet_id                     = var.subnet
     private_ip_address_allocation = "Dynamic"
-    public_ip_address_id          = azurerm_public_ip.windows11.id
+    public_ip_address_id          = azurerm_public_ip.default.id
   }
 
   lifecycle {
@@ -22,21 +26,21 @@ resource "azurerm_network_interface" "windows11" {
   }
 }
 
-resource "azurerm_windows_virtual_machine" "windows11" {
-  name                  = "vm-windows11"
+resource "azurerm_windows_virtual_machine" "default" {
+  name                  = "vm-${local.name}"
   resource_group_name   = var.resource_group_name
   location              = var.location
   size                  = var.size
   admin_username        = var.admin_username
   admin_password        = var.admin_password
-  network_interface_ids = [azurerm_network_interface.windows11.id]
+  network_interface_ids = [azurerm_network_interface.default.id]
 
   identity {
     type = "SystemAssigned"
   }
 
   os_disk {
-    name                 = "osdisk-windows11"
+    name                 = "osdisk-${local.name}"
     caching              = "ReadOnly"
     storage_account_type = "StandardSSD_LRS"
   }
@@ -47,4 +51,12 @@ resource "azurerm_windows_virtual_machine" "windows11" {
     sku       = var.image_sku
     version   = "latest"
   }
+}
+
+resource "azurerm_virtual_machine_extension" "AADLoginForWindows" {
+  name                 = "AADLoginForWindows"
+  virtual_machine_id   = azurerm_windows_virtual_machine.default.id
+  publisher            = "Microsoft.Azure.ActiveDirectory"
+  type                 = "AADLoginForWindows"
+  type_handler_version = "2.2"
 }

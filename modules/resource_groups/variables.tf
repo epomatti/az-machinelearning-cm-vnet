@@ -2,10 +2,10 @@ variable "workload" {
   type = string
 }
 
-variable "location" {
+variable "affix" {
   type = string
 }
 
-variable "resource_group_name" {
+variable "location" {
   type = string
 }

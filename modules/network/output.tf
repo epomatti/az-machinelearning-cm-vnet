@@ -11,11 +11,11 @@ output "bastion_subnet_id" {
 }
 
 output "windows_subnet_id" {
-  value = azurerm_subnet.bastion.id
+  value = azurerm_subnet.windows.id
 }
 
 output "windows_subnet_address_prefixes" {
-  value = azurerm_subnet.bastion.address_prefixes
+  value = azurerm_subnet.windows.address_prefixes
 }
 
 output "private_endpoints_subnet_id" {

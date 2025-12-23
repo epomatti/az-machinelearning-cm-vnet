@@ -22,12 +22,31 @@ variable "allowed_ip_address" {
   type = string
 }
 
+### Shared ###
+variable "default_username" {
+  type = string
+}
+
+variable "default_password" {
+  type      = string
+  sensitive = true
+}
+
 ### VNET ###
 variable "vnet_training_nsg_source_address_prefix" {
   type = string
 }
 
 variable "vnet_training_nsg_destination_address_prefix" {
+  type = string
+}
+
+### Bastion ###
+variable "create_bastion_host" {
+  type = bool
+}
+
+variable "bastion_host_sku" {
   type = string
 }
 
@@ -62,15 +81,6 @@ variable "mlw_aks_vm_size" {
   type = string
 }
 
-### Proxy ###
-variable "vm_proxy_create_flag" {
-  type = bool
-}
-
-variable "vm_proxy_vm_size" {
-  type = string
-}
-
 ### MSSQL ###
 variable "mssql_create_flag" {
   type = bool
@@ -88,20 +98,7 @@ variable "mssql_admin_login" {
   type = string
 }
 
-variable "mssql_admin_login_password" {
-  type = string
-}
-
-### Bastion Host ###
-variable "create_bastion_host" {
-  type = bool
-}
-
-variable "bastion_host_sku" {
-  type = string
-}
-
-### Virtual Machine ###
+### Virtual Machine: Windows 11 Jump Server ###
 variable "vm_size" {
   type = string
 }
@@ -110,13 +107,21 @@ variable "vm_image_sku" {
   type = string
 }
 
-variable "vm_admin_username" {
+### Virtual Machine: Squid Proxy ###
+variable "vm_squid_proxy_create_flag" {
+  type = bool
+}
+
+variable "vm_squid_proxy_size" {
   type = string
 }
 
-variable "vm_admin_password" {
-  type      = string
-  sensitive = true
+variable "vm_squid_proxy_offer" {
+  type = string
+}
+
+variable "vm_squid_proxy_sku" {
+  type = string
 }
 
 ### Entra ID ###
@@ -130,11 +135,6 @@ variable "entraid_data_scientist_username" {
 
 variable "entraid_administrator_username" {
   type = string
-}
-
-variable "entraid_user_password" {
-  type      = string
-  sensitive = true
 }
 
 ### Firewall ###

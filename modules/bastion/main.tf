@@ -1,5 +1,6 @@
 resource "azurerm_public_ip" "main" {
-  name                = "pip-bastion-${var.workload}"
+  count               = var.sku == "Developer" ? 0 : 1
+  name                = "pip-${var.workload}-bastion"
   location            = var.location
   resource_group_name = var.resource_group_name
   allocation_method   = "Static"
@@ -11,11 +12,15 @@ resource "azurerm_bastion_host" "main" {
   location            = var.location
   resource_group_name = var.resource_group_name
 
-  sku = var.sku
+  sku                = var.sku
+  virtual_network_id = var.sku == "Developer" ? var.virtual_network_id : null
 
-  ip_configuration {
-    name                 = "configuration"
-    subnet_id            = var.subnet
-    public_ip_address_id = azurerm_public_ip.main.id
+  dynamic "ip_configuration" {
+    for_each = var.sku == "Developer" ? [] : [""]
+    content {
+      name                 = "configuration"
+      subnet_id            = var.subnet
+      public_ip_address_id = azurerm_public_ip.main[0].id
+    }
   }
 }

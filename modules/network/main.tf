@@ -1,10 +1,10 @@
 locals {
-  vnet_address_space = "10.0.0.0/16"
+  vnet_address_prefix = "10.0"
 }
 
 resource "azurerm_virtual_network" "default" {
   name                = "vnet-${var.workload}"
-  address_space       = [local.vnet_address_space]
+  address_space       = ["${local.vnet_address_prefix}.0.0/16"]
   location            = var.location
   resource_group_name = var.resource_group_name
 }
@@ -18,55 +18,74 @@ resource "azurerm_private_dns_zone_virtual_network_link" "private_litware" {
 }
 
 ### Subnets ###
-
 resource "azurerm_subnet" "bastion" {
   name                 = "AzureBastionSubnet"
   resource_group_name  = var.resource_group_name
   virtual_network_name = azurerm_virtual_network.default.name
-  address_prefixes     = ["10.0.5.0/24"]
+  address_prefixes     = ["${local.vnet_address_prefix}.5.0/26"]
 }
 
 resource "azurerm_subnet" "windows" {
   name                 = "windows"
   resource_group_name  = var.resource_group_name
   virtual_network_name = azurerm_virtual_network.default.name
-  address_prefixes     = ["10.0.10.0/24"]
+  address_prefixes     = ["${local.vnet_address_prefix}.10.0/24"]
 }
 
 resource "azurerm_subnet" "private_endpoints" {
   name                 = "private-endpoints"
   resource_group_name  = var.resource_group_name
   virtual_network_name = azurerm_virtual_network.default.name
-  address_prefixes     = ["10.0.20.0/24"]
+  address_prefixes     = ["${local.vnet_address_prefix}.20.0/24"]
 }
 
 resource "azurerm_subnet" "training" {
   name                 = "training"
   resource_group_name  = var.resource_group_name
   virtual_network_name = azurerm_virtual_network.default.name
-  address_prefixes     = ["10.0.40.0/24"]
+  address_prefixes     = ["${local.vnet_address_prefix}.40.0/24"]
 }
 
 resource "azurerm_subnet" "scoring" {
   name                 = "scoring"
   resource_group_name  = var.resource_group_name
   virtual_network_name = azurerm_virtual_network.default.name
-  address_prefixes     = ["10.0.90.0/24"]
+  address_prefixes     = ["${local.vnet_address_prefix}.90.0/24"]
 }
 
 resource "azurerm_subnet" "scoring_aks_api" {
   name                 = "scoring-aks-api"
   resource_group_name  = var.resource_group_name
   virtual_network_name = azurerm_virtual_network.default.name
-  address_prefixes     = ["10.0.95.0/24"]
+  address_prefixes     = ["${local.vnet_address_prefix}.95.0/24"]
 }
 
 resource "azurerm_subnet" "proxy" {
   name                 = "proxy"
   resource_group_name  = var.resource_group_name
   virtual_network_name = azurerm_virtual_network.default.name
-  address_prefixes     = ["10.0.200.0/24"]
+  address_prefixes     = ["${local.vnet_address_prefix}.200.0/24"]
 }
+
+### Network Security Groups ###
+module "nsg_bastion" {
+  source              = "./nsg/bastion"
+  workload            = var.workload
+  resource_group_name = var.resource_group_name
+  location            = var.location
+  subnet_id           = azurerm_subnet.bastion.id
+}
+
+module "nsg_windows" {
+  source              = "./nsg/windows"
+  workload            = var.workload
+  resource_group_name = var.resource_group_name
+  location            = var.location
+  subnet_id           = azurerm_subnet.windows.id
+  bastion_subnet_cidr = azurerm_subnet.bastion.address_prefixes
+}
+
+
 
 ### Default NSG ###
 resource "azurerm_network_security_group" "default" {
@@ -90,84 +109,6 @@ resource "azurerm_subnet_network_security_group_association" "scoring_aks_api" {
   network_security_group_id = azurerm_network_security_group.default.id
 }
 
-### Bastion NSG ###
-# https://learn.microsoft.com/en-us/azure/bastion/bastion-nsg
-resource "azurerm_network_security_group" "bastion" {
-  name                = "nsg-bastion"
-  location            = var.location
-  resource_group_name = var.resource_group_name
-}
-
-resource "azurerm_subnet_network_security_group_association" "bastion" {
-  subnet_id                 = azurerm_subnet.bastion.id
-  network_security_group_id = azurerm_network_security_group.bastion.id
-
-  depends_on = [
-    # Inbound
-    azurerm_network_security_rule.allow_https_inbound_bastion,
-    azurerm_network_security_rule.allow_gateway_manager_inbound_bastion,
-    azurerm_network_security_rule.allow_azure_load_balancer_inbound_bastion,
-    azurerm_network_security_rule.allow_bastion_host_communication_inbound_bastion
-
-    # Outbound
-  ]
-}
-
-resource "azurerm_network_security_rule" "allow_https_inbound_bastion" {
-  name                        = "AllowHttpsInbound"
-  priority                    = 120
-  direction                   = "Inbound"
-  access                      = "Allow"
-  protocol                    = "Tcp"
-  source_port_range           = "*"
-  destination_port_range      = "443"
-  source_address_prefix       = "Internet"
-  destination_address_prefix  = "*"
-  resource_group_name         = var.resource_group_name
-  network_security_group_name = azurerm_network_security_group.bastion.name
-}
-
-resource "azurerm_network_security_rule" "allow_gateway_manager_inbound_bastion" {
-  name                        = "AllowGatewayManagerInbound"
-  priority                    = 130
-  direction                   = "Inbound"
-  access                      = "Allow"
-  protocol                    = "Tcp"
-  source_port_range           = "*"
-  destination_port_range      = "443"
-  source_address_prefix       = "GatewayManager"
-  destination_address_prefix  = "*"
-  resource_group_name         = var.resource_group_name
-  network_security_group_name = azurerm_network_security_group.bastion.name
-}
-
-resource "azurerm_network_security_rule" "allow_azure_load_balancer_inbound_bastion" {
-  name                        = "AllowAzureLoadBalancerInbound"
-  priority                    = 140
-  direction                   = "Inbound"
-  access                      = "Allow"
-  protocol                    = "Tcp"
-  source_port_range           = "*"
-  destination_port_range      = "443"
-  source_address_prefix       = "AzureLoadBalancer"
-  destination_address_prefix  = "*"
-  resource_group_name         = var.resource_group_name
-  network_security_group_name = azurerm_network_security_group.bastion.name
-}
-
-resource "azurerm_network_security_rule" "allow_bastion_host_communication_inbound_bastion" {
-  name                        = "AllowBastionHostCommunication"
-  priority                    = 150
-  direction                   = "Inbound"
-  access                      = "Allow"
-  protocol                    = "*"
-  source_port_range           = "*"
-  destination_port_ranges     = ["8080", "5701"]
-  source_address_prefix       = "VirtualNetwork"
-  destination_address_prefix  = "VirtualNetwork"
-  resource_group_name         = var.resource_group_name
-  network_security_group_name = azurerm_network_security_group.bastion.name
-}
 
 ### Proxy NSG ###
 resource "azurerm_network_security_group" "proxy" {
